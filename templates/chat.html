@@ -1,0 +1,682 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HunarHub</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    
+    <style>
+        :root {
+            --primary-color: #E67E5B;
+            --secondary-color: #F4E4D1;
+            --text-color: #5A4A3A;
+            --light-bg: #FAF7F2;
+        }
+        
+        body {
+            background: linear-gradient(135deg, var(--primary-color) 0%, #F0A085 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: var(--text-color);
+            margin: 0;
+            padding: 0;
+        }
+        
+        /* Mobile Layout - Full Screen */
+        .main-container {
+            background: var(--light-bg);
+            min-height: 100vh;
+            width: 100%;
+        }
+        
+        /* Desktop Layout - Full Screen with Multi-column */
+        @media (min-width: 992px) {
+            .main-container {
+                min-height: 100vh;
+                display: flex;
+                flex-direction: column;
+            }
+            
+            .desktop-layout {
+                flex: 1;
+                display: grid;
+                grid-template-columns: 1fr 2fr 1fr;
+                gap: 2rem;
+                padding: 2rem;
+                max-width: 1400px;
+                margin: 0 auto;
+                width: 100%;
+            }
+            
+            .left-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+            
+            .center-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 2rem;
+            }
+            
+            .right-panel {
+                display: flex;
+                flex-direction: column;
+                gap: 1.5rem;
+            }
+        }
+        
+        .header {
+            background: var(--primary-color);
+            color: white;
+            padding: 15px 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        @media (min-width: 992px) {
+            .header {
+                padding: 20px 40px;
+                font-size: 1.2rem;
+            }
+        }
+        
+        .logo {
+            font-weight: 700;
+            font-size: 1.2rem;
+            display: flex;
+            align-items: center;
+        }
+        
+        @media (min-width: 992px) {
+            .logo {
+                font-size: 2rem;
+            }
+        }
+        
+        .logo i {
+            margin-left: 8px;
+            font-size: 1rem;
+        }
+        
+        @media (min-width: 992px) {
+            .logo i {
+                font-size: 1.5rem;
+            }
+        }
+        
+       
+        
+        /* Mobile Content */
+        .mobile-content {
+            padding: 20px;
+        }
+        
+        @media (min-width: 992px) {
+            .mobile-content {
+                display: none;
+            }
+        }
+        
+        /* Desktop Content - Hidden on Mobile */
+        .desktop-content {
+            display: none;
+        }
+        
+        @media (min-width: 992px) {
+            .desktop-content {
+                display: block;
+                flex: 1;
+            }
+        }
+        
+        /* Action Buttons */
+        .action-buttons {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        @media (min-width: 576px) and (max-width: 991px) {
+            .action-buttons {
+                gap: 20px;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .action-buttons {
+                grid-template-columns: 1fr;
+                gap: 20px;
+            }
+            
+            .desktop-action-grid {
+                display: grid;
+                grid-template-columns: repeat(2, 1fr);
+                gap: 30px;
+            }
+        }
+        
+        .btn-action {
+            background: white;
+            border: 2px solid #E5E5E5;
+            border-radius: 12px;
+            padding: 15px 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            color: var(--text-color);
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            min-height: 60px;
+            flex-direction: column;
+            text-align: center;
+        }
+        
+        .btn-action i {
+            font-size: 1.2rem;
+            margin-bottom: 4px;
+        }
+        
+        .btn-action span {
+            display: block;
+            line-height: 1.2;
+        }
+        
+        @media (min-width: 376px) and (max-width: 575px) {
+            .btn-action {
+                font-size: 0.9rem;
+                padding: 18px 15px;
+                min-height: 70px;
+            }
+            
+            .btn-action i {
+                font-size: 1.3rem;
+            }
+        }
+        
+        @media (min-width: 576px) and (max-width: 991px) {
+            .btn-action {
+                padding: 20px 18px;
+                font-size: 1rem;
+                min-height: 80px;
+            }
+            
+            .btn-action i {
+                font-size: 1.5rem;
+                margin-bottom: 6px;
+            }
+        }
+        
+        @media (min-width: 992px) {
+            .btn-action {
+                padding: 25px 30px;
+                font-size: 1.2rem;
+                border-radius: 20px;
+                min-height: 120px;
+                flex-direction: column;
+                gap: 15px;
+            }
+            
+            .btn-action i {
+                font-size: 2.5rem;
+                margin-bottom: 0;
+            }
+            
+            .btn-action span {
+                margin-top: 10px;
+            }
+        }
+        
+        .btn-action:hover {
+            background: #f8f9fa;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            text-decoration: none;
+        }
+        
+        @media (min-width: 992px) {
+            .btn-action:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 10px 25px rgba(0,0,0,0.15);
+            }
+        }
+        
+        .explore-section h5 {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 20px;
+            font-size: 1.1rem;
+        }
+        
+        @media (min-width: 992px) {
+            .explore-section h5 {
+                font-size: 2rem;
+                margin-bottom: 30px;
+            }
+        }
+        
+        /* Hover Dropdown Menu */
+        .explore-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        
+        .dropdown-item {
+            position: relative;
+        }
+        
+        .dropdown-header {
+            background: white;
+            border: 2px solid #E5E5E5;
+            border-radius: 12px;
+            padding: 15px 20px;
+            display: flex;
+            align-items: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 500;
+            color: var(--text-color);
+        }
+        
+        @media (min-width: 992px) {
+            .dropdown-header {
+                padding: 20px 30px;
+                font-size: 1.2rem;
+                border-radius: 20px;
+            }
+        }
+        
+        .dropdown-header:hover {
+            background: #f8f9fa;
+            border-color: var(--primary-color);
+            color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+        }
+        
+        .dropdown-header i.fa-chevron-down {
+            transition: transform 0.3s ease;
+            font-size: 0.8rem;
+        }
+        
+        @media (min-width: 992px) {
+            .dropdown-header i.fa-chevron-down {
+                font-size: 1rem;
+            }
+        }
+        
+        .dropdown-item:hover .dropdown-header i.fa-chevron-down {
+            transform: rotate(180deg);
+        }
+        
+        .dropdown-content {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 12px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.15);
+            opacity: 0;
+            visibility: hidden;
+            transform: translateY(-10px);
+            transition: all 0.3s ease;
+            z-index: 1000;
+            margin-top: 5px;
+        }
+        
+        @media (min-width: 992px) {
+            .dropdown-content {
+                border-radius: 20px;
+                margin-top: 10px;
+            }
+        }
+        
+        .dropdown-item:hover .dropdown-content {
+            opacity: 1;
+            visibility: visible;
+            transform: translateY(0);
+        }
+        
+        .dropdown-list {
+            padding: 10px 0;
+        }
+        
+        @media (min-width: 992px) {
+            .dropdown-list {
+                padding: 15px 0;
+            }
+        }
+        
+        .list-item {
+            padding: 12px 20px;
+            color: var(--text-color);
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        
+        @media (min-width: 992px) {
+            .list-item {
+                padding: 15px 30px;
+                font-size: 1.1rem;
+            }
+        }
+        
+        .list-item:last-child {
+            border-bottom: none;
+        }
+        
+        .list-item:hover {
+            background: rgba(230, 126, 91, 0.1);
+            color: var(--primary-color);
+            transform: translateX(10px);
+        }
+        
+        .chat-button {
+            background: #4A90E2;
+            color: white;
+            border: none;
+            border-radius: 25px;
+            padding: 12px 30px;
+            font-weight: 600;
+            width: 100%;
+            font-size: 1rem;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 15px rgba(74, 144, 226, 0.3);
+        }
+        
+        @media (min-width: 992px) {
+            .chat-button {
+                padding: 20px 40px;
+                font-size: 1.3rem;
+                border-radius: 50px;
+                margin-top: 20px;
+            }
+        }
+        
+        .chat-button:hover {
+            background: #3A7BC8;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(74, 144, 226, 0.4);
+        }
+        
+        @media (min-width: 992px) {
+            .chat-button:hover {
+                transform: translateY(-5px);
+                box-shadow: 0 15px 30px rgba(74, 144, 226, 0.4);
+            }
+        }
+        
+        /* Desktop Sidebar Content */
+        .sidebar-card {
+            background: white;
+            border-radius: 20px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+        
+        .sidebar-card:hover {
+            transform: translateY(-5px);
+        }
+        
+        .sidebar-card h6 {
+            color: var(--text-color);
+            font-weight: 600;
+            margin-bottom: 15px;
+            font-size: 1.1rem;
+        }
+        
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+        
+        .stat-item {
+            text-align: center;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 12px;
+        }
+        
+        .stat-number {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+        
+        .stat-label {
+            font-size: 0.9rem;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        /* Responsive adjustments */
+        @media (max-width: 991px) {
+            .desktop-layout,
+            .desktop-content,
+            .sidebar-card {
+                display: none !important;
+            }
+        }
+        
+        @media (max-width: 575px) {
+            .mobile-content {
+                padding: 15px;
+            }
+            
+            .nav-tabs {
+                overflow-x: auto;
+                white-space: nowrap;
+                scrollbar-width: none;
+                -ms-overflow-style: none;
+            }
+            
+            .nav-tabs::-webkit-scrollbar {
+                display: none;
+            }
+            
+            .nav-tabs .nav-item {
+                display: inline-block;
+                float: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="header">
+            <div class="logo">
+                HunarHub <i class="fas fa-palette"></i>
+            </div>
+            
+        </div>
+        
+        <!-- Full Screen on Mobile -->
+        <div class="mobile-content">
+            <div class="action-buttons">
+                <a href="Addprod.html" class="btn-action">
+                    <i class="fas fa-plus"></i>
+                    <span>Add Product</span>
+                </a>
+                <a href="events.html" class="btn-action">
+                    <i class="fas fa-calendar-alt"></i>
+                    <span>Events</span>
+                </a>
+                <a href="history.html" class="btn-action">
+                    <i class="fas fa-chart-bar"></i>
+                    <span>History</span>
+                </a>
+                <a href="settings.html" class="btn-action">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </div>
+            
+            <div class="explore-section">
+                <h5>Explore</h5>
+                
+                <div class="explore-menu">
+                    <div class="dropdown-item">
+                        <div class="dropdown-header">
+                            <i class="fas fa-th-large me-2"></i>
+                            <span>Category</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </div>
+                        <div class="dropdown-content">
+                            <div class="dropdown-list">
+                                <div class="list-item">Home Decor</div>
+                                <div class="list-item">Handicrafts</div>
+                                <div class="list-item">Canvas Arts</div>
+                                <div class="list-item">Pottery</div>
+                                <div class="list-item">Woodworks</div>
+                                <div class="list-item">Miniatures</div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="dropdown-item">
+                        <div class="dropdown-header">
+                            <i class="fas fa-palette me-2"></i>
+                            <span>Genre</span>
+                            <i class="fas fa-chevron-down ms-auto"></i>
+                        </div>
+                        <div class="dropdown-content">
+                            <div class="dropdown-list">
+                                <div class="list-item">Traditional</div>
+                                <div class="list-item">Tribal Art</div>
+                                <div class="list-item">Abstract</div>
+                                <div class="list-item">Realistic</div>
+                                <div class="list-item">Folk Art</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <a href="{{ url_for('ai_chat') }}">
+                <button class="btn btn-primary btn-lg btn-block">Start AI Assistant Chat</button>
+                </a>
+
+        </div>
+        
+        <!--Full Screen Multi-column Layout -->
+        <div class="desktop-content">
+            <div class="desktop-layout">
+                <div class="left-panel">
+                    <div class="sidebar-card">
+                        <h6><i class="fas fa-chart-line me-2"></i>History</h6>
+                        <a href="history.html">Check data</a>
+                        
+                    </div>
+                    
+                    <div class="sidebar-card">
+                        <h6><i class="fas fa-bolt me-2"></i>Quick Actions</h6>
+                        <div class="desktop-action-grid">
+                            <a href="Addprod.html" class="btn-action">
+                                <i class="fas fa-plus"></i>
+                                <span>Add Product</span>
+                            </a>
+                            <a href="events.html" class="btn-action">
+                                <i class="fas fa-calendar-alt"></i>
+                                <span>Events</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="center-panel">
+                    <div class="explore-section">
+                        <h5>Domains Available</h5>
+                        
+                        <div class="explore-menu">
+                            <div class="dropdown-item">
+                                <div class="dropdown-header">
+                                    <i class="fas fa-th-large me-2"></i>
+                                    <span>Category</span>
+                                    <i class="fas fa-chevron-down ms-auto"></i>
+                                </div>
+                                <div class="dropdown-content">
+                                    <div class="dropdown-list">
+                                        <div class="list-item">Home Decor</div>
+                                        <div class="list-item">Handicrafts</div>
+                                        <div class="list-item">Canvas Arts</div>
+                                        <div class="list-item">Digital Art</div>
+                                        <div class="list-item">Pottery</div>
+                                        <div class="list-item">Woodworks</div>
+                                        <div class="list-item">Miniatures</div>
+                                        <div class="list-item">Jewelry</div>
+                                    </div>
+                                </div>
+                            </div>
+                            
+                            <div class="dropdown-item">
+                                <div class="dropdown-header">
+                                    <i class="fas fa-palette me-2"></i>
+                                    <span>Genre</span>
+                                    <i class="fas fa-chevron-down ms-auto"></i>
+                                </div>
+                                <div class="dropdown-content">
+                                    <div class="dropdown-list">
+                                        <div class="list-item">Traditional</div>
+                                        <div class="list-item">Tribal Art</div>
+                                        <div class="list-item">Abstract</div>
+                                        <div class="list-item">Realistic</div>
+                                        <div class="list-item">Folk Art</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <a href="{{ url_for('ai_chat') }}">
+                        <button class="btn btn-primary btn-lg btn-block">Start AI Assistant Chat</button>
+                        </a>
+
+                </div>
+                
+                <div class="right-panel">
+                    <div class="sidebar-card">
+                        <h6><i class="fas fa-tools me-2"></i>General</h6>
+                        <div class="desktop-action-grid">
+                            <a href="aboutapp.html" class="btn-action">
+                                <i class="fas fa-cog"></i>
+                                <span>About</span>
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Initialize tooltips only
+        var tooltipTriggerList = [].slice.call(document.querySelectorAll('[data-bs-toggle="tooltip"]'))
+        var tooltipList = tooltipTriggerList.map(function (tooltipTriggerEl) {
+            return new bootstrap.Tooltip(tooltipTriggerEl)
+        });
+        
+        window.addEventListener('resize', function() {
+            tooltipList.forEach(tooltip => tooltip.hide());
+        });
+    </script>
+</body>
+</html>

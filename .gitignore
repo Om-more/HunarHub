@@ -1,0 +1,30 @@
+# Add myenv to .gitignore
+@"
+
+# Virtual Environment
+myenv/
+
+# Environment variables
+.env
+
+
+# Python cache files
+__pycache__/
+*.py[cod]
+*$py.class
+*.pyc
+*.pyo
+
+# Flask specific
+instance/
+.webassets-cache
+.env
+.flaskenv
+
+# Python build artifacts
+build/
+dist/
+*.egg-info/
+.installed.cfg
+
+"@ | Add-Content .gitignore

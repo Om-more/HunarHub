@@ -1,0 +1,6 @@
+Flask
+gunicorn
+python-dotenv
+google-generativeai
+pandas
+Pillow
