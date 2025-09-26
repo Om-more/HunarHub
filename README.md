@@ -5,3 +5,6 @@ HunarHub is an AI-powered digital assistant designed to empower local artisans i
 navigation goes like:
 
 Home page -> Ask the assitant for sugestion or anything -> Go in for "Add Product" on home screen -> see the stats in "History" ->see for upcoming vents in "Events".
+<img width="1919" height="909" alt="image" src="https://github.com/user-attachments/assets/d5c45910-0adf-41b8-b108-7d4626c5818d" />
+<img width="1904" height="905" alt="image" src="https://github.com/user-attachments/assets/399ebed0-ad11-4a87-ba3f-a19c7f8246fa" />
+<img width="1885" height="876" alt="image" src="https://github.com/user-attachments/assets/81a46d5b-142c-4a76-a528-6c3d1fb3c522" />
