@@ -6,6 +6,8 @@ myenv/
 
 # Environment variables
 .env
+static/uploads/*
+
 
 
 # Python cache files
