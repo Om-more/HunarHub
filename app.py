@@ -77,7 +77,7 @@ def dashboard():
 def event():
     return render_template('Events.html')
 
-@app.route('/Addprod.html')
+@app.route('/addprod.html')
 def addprod():
     return render_template('addprod.html')
 
