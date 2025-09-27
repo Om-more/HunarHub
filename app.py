@@ -3,8 +3,7 @@ import json
 import pandas as pd
 from dotenv import load_dotenv
 import os
-from flask import Flask, render_template, request, redirect, url_for, jsonify
-from werkzeug.utils import secure_filename
+from flask import Flask, render_template, request, redirect, url_for, jsonify, session
 import re
 from PIL import Image
 import base64
@@ -16,34 +15,32 @@ import uuid
 load_dotenv()
 
 app = Flask(__name__)
+app.secret_key = os.getenv("SECRET_KEY", "supersecret")  # needed for sessions
 UPLOAD_FOLDER = "static/uploads"
-DATA_FILE = "data.csv"  # CSV file in root directory
-ALLOWED_EXTENSIONS = {'jpg', 'jpeg', 'png'}
-
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 API_KEY = os.getenv("API_KEY")
+
 genai.configure(api_key=API_KEY)
 model = genai.GenerativeModel("gemini-2.5-flash")
 
+def get_session_csv():
+    """Return CSV filename for current session"""
+    if "csv_file" not in session:
+        session["csv_file"] = f"data_{uuid.uuid4().hex}.csv"
+        initialize_csv(session["csv_file"])
+    return session["csv_file"]
 
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
-
-
-def initialize_csv():
-    """Initialize CSV file if it doesn't exist"""
-    if not os.path.exists(DATA_FILE):
-        headers = ['Image', 'Name', 'Category', 'Location', 'Description', 'Price', 'Date_Added']
-        with open(DATA_FILE, 'w', newline='', encoding='utf-8') as file:
-            writer = csv.writer(file)
-            writer.writerow(headers)
-        print(f"Created new CSV file: {DATA_FILE}")
-
+def initialize_csv(file_name):
+    """Initialize CSV file with headers"""
+    headers = ['Image', 'Name', 'Category', 'Location', 'Description', 'Price', 'Date_Added']
+    with open(file_name, 'w', newline='', encoding='utf-8') as file:
+        writer = csv.writer(file)
+        writer.writerow(headers)
 
 def save_product_to_csv(product_data):
-    """Save product data to CSV file"""
+    """Save product data to session-specific CSV"""
     try:
-        initialize_csv()
+        csv_file = get_session_csv()
         row = [
             product_data.get('image', ''),
             product_data.get('name', ''),
@@ -53,60 +50,52 @@ def save_product_to_csv(product_data):
             product_data.get('price', ''),
             datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         ]
-        with open(DATA_FILE, 'a', newline='', encoding='utf-8') as file:
+        with open(csv_file, 'a', newline='', encoding='utf-8') as file:
             writer = csv.writer(file)
             writer.writerow(row)
         return True, "Product saved successfully"
     except Exception as e:
         return False, f"Error saving product: {str(e)}"
 
-
 def read_csv_data():
-    """Read all data from CSV file"""
+    """Read all data from session-specific CSV"""
     try:
-        if not os.path.exists(DATA_FILE):
+        csv_file = get_session_csv()
+        if not os.path.exists(csv_file):
             return []
-        df = pd.read_csv(DATA_FILE)
+        df = pd.read_csv(csv_file)
         return df.to_dict('records')
     except Exception as e:
         print(f"Error reading CSV: {str(e)}")
         return []
 
-
 @app.route('/')
 def dashboard():
     return render_template('chat.html')
-
 
 @app.route('/events.html')
 def event():
     return render_template('Events.html')
 
-
 @app.route('/Addprod.html')
 def addprod():
     return render_template('addprod.html')
-
 
 @app.route('/chat.html')
 def chat():
     return render_template('chat.html')
 
-
 @app.route('/aboutapp.html')
 def aboutapp():
     return render_template('aboutapp.html')
-
 
 @app.route('/AI.html')
 def ai_interface():
     return render_template('AI.html')
 
-
 @app.route('/history.html')
 def history():
     return render_template('history.html')
-
 
 @app.route('/api/save-product', methods=['POST'])
 def save_product():
@@ -116,33 +105,22 @@ def save_product():
         for field in required_fields:
             if not data.get(field):
                 return jsonify({'success': False, 'error': f'{field.title()} is required'}), 400
-
-        # Server-side price validation
-        try:
-            price = float(data.get('price'))
-            if price <= 0:
-                return jsonify({'success': False, 'error': 'Price must be positive'}), 400
-        except ValueError:
-            return jsonify({'success': False, 'error': 'Invalid price format'}), 400
-
+        
         product_data = {
             'image': data.get('image', 'No image'),
             'name': data.get('name'),
             'category': data.get('category', 'Uncategorized'),
             'location': data.get('location', 'Not specified'),
             'description': data.get('description'),
-            'price': price
+            'price': data.get('price')
         }
-
         success, message = save_product_to_csv(product_data)
         if success:
             return jsonify({'success': True, 'message': message})
         else:
             return jsonify({'success': False, 'error': message}), 500
-
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @app.route('/api/get-products', methods=['GET'])
 def get_products():
@@ -152,27 +130,22 @@ def get_products():
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
 
-
 @app.route('/api/chat', methods=['POST'])
 def api_chat():
     try:
         data = request.get_json()
-        message = data.get('message', '').strip()
-        if not message:
-            return jsonify({'success': False, 'error': 'Please enter a question.'}), 400
-
+        message = data.get('message', '')
         image_data = data.get('image', None)
+        
         if image_data:
             image_bytes = base64.b64decode(image_data.split(',')[1])
             answer = query_with_image(message, image_bytes=image_bytes)
         else:
             answer = query_with_image(message)
-
+        
         return jsonify({'success': True, 'response': answer})
-
     except Exception as e:
         return jsonify({'success': False, 'error': str(e)}), 500
-
 
 @app.route('/ai-chat', methods=['GET', 'POST'])
 def ai_chat():
@@ -180,22 +153,15 @@ def ai_chat():
     img_url = None
     user_message = None
     if request.method == 'POST':
-        user_message = request.form.get('question', '').strip()
+        user_message = request.form.get('question', '')
         image = request.files.get('image')
-
         if image and image.filename != '':
-            if not allowed_file(image.filename):
-                answer = "Unsupported file type. Please upload JPG or PNG."
-            else:
-                filename = secure_filename(image.filename)
-                filename = f"{uuid.uuid4().hex}_{filename}"
-                img_path = os.path.join(app.config['UPLOAD_FOLDER'], filename)
-                image.save(img_path)
-                img_url = url_for('static', filename=f'uploads/{filename}')
-                answer = query_with_image(user_message, img_path)
+            img_path = os.path.join(app.config['UPLOAD_FOLDER'], image.filename)
+            image.save(img_path)
+            img_url = url_for('static', filename=f'uploads/{image.filename}')
+            answer = query_with_image(user_message, img_path)
         else:
             answer = query_with_image(user_message)
-
     return render_template('AI.html', answer=answer, img_url=img_url, user_message=user_message)
 
 
@@ -232,6 +198,5 @@ Answer in a friendly and natural way:
 
 if __name__ == '__main__':
     os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-    initialize_csv()
     port = int(os.environ.get('PORT', 5000))
     app.run(host='0.0.0.0', port=port, debug=False)
