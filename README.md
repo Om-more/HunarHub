@@ -1,7 +1,7 @@
 ## Breif on prototype.
 
 HunarHub is an AI-powered digital assistant prototype designed to empower local artisans in entering and thriving within online marketplaces. It offers smart support such as product description and naming suggestions, competitive price analysis, digital presentation tips, and easy integration with platforms like Meesho, Karigar, and Etsy. With a simple multilingual chat interface, ArtisianAI acts as a mentor—helping artisans understand competition, showcase their work effectively, and confidently scale their presence in the digital economy.
-
+Link to project: https://hunarhub.onrender.com/
 You can watch the video of working : https://drive.google.com/file/d/1uM2z3IwZ3tKM4DCimJYQt8MKbx1fxjKd/view?usp=drive_link
 
 navigation goes like:
