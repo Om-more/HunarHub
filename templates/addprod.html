@@ -535,6 +535,31 @@
                 font-size: 1.1rem;
             }
         }
+
+        .feedback-prompt {
+            background: white;
+            border: 2px solid rgba(230, 126, 91, 0.25);
+            border-radius: 12px;
+            padding: 15px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .feedback-prompt button {
+            background: #f8f9fa;
+            color: var(--text-color);
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 36px;
+            height: 36px;
+            margin-right: 8px;
+        }
+
+        .feedback-prompt button.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
         
         /* Loading Spinner */
         .loading {
@@ -600,6 +625,17 @@
                 <div class="success-message" id="successMessage">
                     <i class="fas fa-check-circle me-2"></i>
                     Product added successfully!
+                </div>
+
+                <div class="feedback-prompt" id="productFeedback">
+                    <div class="mb-2"><strong>Was this AI suggestion helpful?</strong></div>
+                    <button type="button" id="productFeedbackUp" aria-label="Helpful">
+                        <i class="fas fa-thumbs-up"></i>
+                    </button>
+                    <button type="button" id="productFeedbackDown" aria-label="Not helpful">
+                        <i class="fas fa-thumbs-down"></i>
+                    </button>
+                    <span id="productFeedbackStatus"></span>
                 </div>
                 
                 <div class="loading" id="loadingSpinner">
@@ -722,6 +758,7 @@ const fileInput = document.getElementById('fileInput');
 const uploadContent = document.getElementById('uploadContent');
 const previewImage = document.getElementById('previewImage');
 let uploadedImageName = '';
+let productCreatedFromSuggestion = false;
 
 imageUploadArea.addEventListener('click', () => {
     fileInput.click();
@@ -784,7 +821,95 @@ descInput.addEventListener('input', () => {
     descCounter.classList.toggle('warning', count > 450);
 });
 
-// Form Submission with CSV Storage
+function updateCounters() {
+    nameCounter.textContent = `${nameInput.value.length}/100`;
+    descCounter.textContent = `${descInput.value.length}/500`;
+    nameCounter.classList.toggle('warning', nameInput.value.length > 90);
+    descCounter.classList.toggle('warning', descInput.value.length > 450);
+}
+
+function setCategoryFromSuggestion(category) {
+    if (!category) return;
+    const categorySelect = document.getElementById('category');
+    const normalized = category.toLowerCase().replace(/&/g, 'and').replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+    const matchingOption = Array.from(categorySelect.options).find(option => {
+        return option.value === normalized || option.textContent.toLowerCase() === category.toLowerCase();
+    });
+    if (matchingOption) {
+        categorySelect.value = matchingOption.value;
+    }
+}
+
+function applyStoredSuggestion() {
+    const storedSuggestion = sessionStorage.getItem('productSuggestion');
+    if (!storedSuggestion) return;
+
+    try {
+        const suggestion = JSON.parse(storedSuggestion);
+        if (suggestion.name) document.getElementById('productName').value = suggestion.name;
+        if (suggestion.description) document.getElementById('description').value = suggestion.description;
+        if (suggestion.price) document.getElementById('price').value = String(suggestion.price).replace(/[^0-9.]/g, '');
+        if (suggestion.location) document.getElementById('location').value = suggestion.location;
+        setCategoryFromSuggestion(suggestion.category);
+        productCreatedFromSuggestion = true;
+        updateCounters();
+    } catch (error) {
+        console.error('Could not apply product suggestion:', error);
+    } finally {
+        sessionStorage.removeItem('productSuggestion');
+    }
+}
+
+async function sendProductFeedback(productId, rating, selectedButton) {
+    const upButton = document.getElementById('productFeedbackUp');
+    const downButton = document.getElementById('productFeedbackDown');
+    const status = document.getElementById('productFeedbackStatus');
+
+    upButton.disabled = true;
+    downButton.disabled = true;
+
+    try {
+        const response = await fetch('/api/feedback', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                target_type: 'product',
+                target_id: productId,
+                rating: rating
+            })
+        });
+        const result = await response.json();
+        if (result.success) {
+            selectedButton.classList.add('selected');
+            status.textContent = 'Saved';
+        } else {
+            status.textContent = 'Could not save';
+        }
+    } catch (error) {
+        status.textContent = 'Could not save';
+    }
+}
+
+function showProductFeedback(productId) {
+    const feedbackPrompt = document.getElementById('productFeedback');
+    const upButton = document.getElementById('productFeedbackUp');
+    const downButton = document.getElementById('productFeedbackDown');
+    const status = document.getElementById('productFeedbackStatus');
+
+    feedbackPrompt.style.display = 'block';
+    upButton.disabled = false;
+    downButton.disabled = false;
+    upButton.classList.remove('selected');
+    downButton.classList.remove('selected');
+    status.textContent = '';
+    upButton.onclick = () => sendProductFeedback(productId, 1, upButton);
+    downButton.onclick = () => sendProductFeedback(productId, -1, downButton);
+}
+
+applyStoredSuggestion();
+
 document.getElementById('productForm').addEventListener('submit', async (e) => {
     e.preventDefault();
     
@@ -828,6 +953,11 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
         
         if (result.success) {
             document.getElementById('successMessage').style.display = 'block';
+            if (productCreatedFromSuggestion && result.product_id) {
+                showProductFeedback(result.product_id);
+            } else {
+                document.getElementById('productFeedback').style.display = 'none';
+            }
             
             document.getElementById('productForm').reset();
             uploadContent.style.display = 'block';
@@ -835,6 +965,7 @@ document.getElementById('productForm').addEventListener('submit', async (e) => {
             nameCounter.textContent = '0/100';
             descCounter.textContent = '0/500';
             uploadedImageName = '';
+            productCreatedFromSuggestion = false;
             
             setTimeout(() => {
                 document.getElementById('successMessage').style.display = 'none';

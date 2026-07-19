@@ -7,6 +7,7 @@ myenv/
 # Environment variables
 .env
 static/uploads/*
+hunarhub.db
 
 
 

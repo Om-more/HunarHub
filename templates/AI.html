@@ -293,6 +293,49 @@
         .file-input {
             display: none;
         }
+
+        .suggestion-card {
+            margin-top: 12px;
+            padding-top: 12px;
+            border-top: 1px solid #eee;
+        }
+
+        .suggestion-btn {
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 18px;
+            padding: 8px 14px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .feedback-actions {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+        }
+
+        .feedback-btn {
+            background: #f8f9fa;
+            color: var(--text-color);
+            border: 1px solid #ddd;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+        }
+
+        .feedback-btn.selected {
+            background: var(--primary-color);
+            color: white;
+            border-color: var(--primary-color);
+        }
+
+        .feedback-note {
+            color: #666;
+            font-size: 0.82rem;
+        }
         
         /* Mobile Responsive */
         @media (max-width: 768px) {
@@ -480,8 +523,10 @@
                 loadingMessage.remove();
                 
                 if (data.success) {
-                    // Add bot response
-                    addMessage(data.response, 'bot');
+                    addMessage(data.response, 'bot', null, {
+                        productSuggestion: data.product_suggestion,
+                        messageId: data.message_id
+                    });
                 } else {
                     addMessage('Sorry, I encountered an error: ' + data.error, 'bot');
                 }
@@ -499,7 +544,7 @@
         }
         
         // Add message to chat
-        function addMessage(text, sender, imageSrc = null) {
+        function addMessage(text, sender, imageSrc = null, options = {}) {
             const messagesContainer = document.getElementById('messagesContainer');
             
             const messageDiv = document.createElement('div');
@@ -549,6 +594,28 @@
                 
                 bubble.appendChild(textDiv);
             }
+
+            if (sender === 'bot' && options.productSuggestion) {
+                const suggestionCard = document.createElement('div');
+                suggestionCard.className = 'suggestion-card';
+
+                const useButton = document.createElement('button');
+                useButton.type = 'button';
+                useButton.className = 'suggestion-btn';
+                useButton.innerHTML = 'Use this for a new product listing &rarr;';
+                useButton.addEventListener('click', () => {
+                    sessionStorage.setItem('productSuggestion', JSON.stringify(options.productSuggestion));
+                    window.location.href = '/addprod.html';
+                });
+
+                suggestionCard.appendChild(useButton);
+
+                if (options.messageId) {
+                    suggestionCard.appendChild(createFeedbackControls('chat_message', options.messageId));
+                }
+
+                bubble.appendChild(suggestionCard);
+            }
             
             messageDiv.appendChild(avatar);
             messageDiv.appendChild(bubble);
@@ -557,6 +624,59 @@
             messagesContainer.scrollTop = messagesContainer.scrollHeight;
             
             return messageDiv;
+        }
+
+        function createFeedbackControls(targetType, targetId) {
+            const wrapper = document.createElement('div');
+            wrapper.className = 'feedback-actions';
+
+            const upButton = document.createElement('button');
+            upButton.type = 'button';
+            upButton.className = 'feedback-btn';
+            upButton.innerHTML = '<i class="fas fa-thumbs-up"></i>';
+
+            const downButton = document.createElement('button');
+            downButton.type = 'button';
+            downButton.className = 'feedback-btn';
+            downButton.innerHTML = '<i class="fas fa-thumbs-down"></i>';
+
+            const note = document.createElement('span');
+            note.className = 'feedback-note';
+
+            async function submitFeedback(rating, selectedButton) {
+                upButton.disabled = true;
+                downButton.disabled = true;
+                try {
+                    const response = await fetch('/api/feedback', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify({
+                            target_type: targetType,
+                            target_id: targetId,
+                            rating: rating
+                        })
+                    });
+                    const result = await response.json();
+                    if (result.success) {
+                        selectedButton.classList.add('selected');
+                        note.textContent = 'Saved';
+                    } else {
+                        note.textContent = 'Could not save';
+                    }
+                } catch (error) {
+                    note.textContent = 'Could not save';
+                }
+            }
+
+            upButton.addEventListener('click', () => submitFeedback(1, upButton));
+            downButton.addEventListener('click', () => submitFeedback(-1, downButton));
+
+            wrapper.appendChild(upButton);
+            wrapper.appendChild(downButton);
+            wrapper.appendChild(note);
+            return wrapper;
         }
         
         // Add loading message

@@ -102,6 +102,20 @@
             margin-left: 8px;
             font-size: 1rem;
         }
+
+        .profile-btn {
+            background: rgba(255,255,255,0.2);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            padding: 8px 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .profile-btn:hover {
+            background: rgba(255,255,255,0.3);
+        }
         
         @media (min-width: 992px) {
             .logo i {
@@ -505,7 +519,9 @@
             <div class="logo">
                 HunarHub <i class="fas fa-palette"></i>
             </div>
-            
+            <button class="profile-btn" type="button" data-bs-toggle="modal" data-bs-target="#profileModal">
+                <i class="fas fa-user-cog me-1"></i> Profile
+            </button>
         </div>
         
         <!-- Full Screen on Mobile -->
@@ -665,6 +681,49 @@
             </div>
         </div>
     </div>
+
+    <div class="modal fade" id="profileModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Artisan Profile</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <form id="profileForm">
+                    <div class="modal-body">
+                        <div class="mb-3">
+                            <label class="form-label" for="profileName">Name</label>
+                            <input class="form-control" id="profileName" disabled>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="profileCraftType">Craft type</label>
+                            <input class="form-control" id="profileCraftType" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="profileLocation">Location</label>
+                            <input class="form-control" id="profileLocation" maxlength="100">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label" for="profileLanguage">Language</label>
+                            <select class="form-control" id="profileLanguage">
+                                <option value="en">English</option>
+                                <option value="hi">Hindi</option>
+                                <option value="bn">Bengali</option>
+                                <option value="ta">Tamil</option>
+                                <option value="te">Telugu</option>
+                                <option value="mr">Marathi</option>
+                            </select>
+                        </div>
+                        <div id="profileStatus" class="small"></div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
     
     <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script>
     <script>
@@ -676,6 +735,52 @@
         
         window.addEventListener('resize', function() {
             tooltipList.forEach(tooltip => tooltip.hide());
+        });
+
+        const profileModal = document.getElementById('profileModal');
+        const profileForm = document.getElementById('profileForm');
+        const profileStatus = document.getElementById('profileStatus');
+
+        profileModal.addEventListener('show.bs.modal', async function() {
+            profileStatus.textContent = '';
+            try {
+                const response = await fetch('/api/profile');
+                if (response.status === 401) {
+                    window.location.href = '/onboard';
+                    return;
+                }
+                const result = await response.json();
+                if (result.success) {
+                    document.getElementById('profileName').value = result.profile.name || '';
+                    document.getElementById('profileCraftType').value = result.profile.craft_type || '';
+                    document.getElementById('profileLocation').value = result.profile.location || '';
+                    document.getElementById('profileLanguage').value = result.profile.language_pref || 'en';
+                }
+            } catch (error) {
+                profileStatus.textContent = 'Could not load profile.';
+            }
+        });
+
+        profileForm.addEventListener('submit', async function(event) {
+            event.preventDefault();
+            profileStatus.textContent = 'Saving...';
+            try {
+                const response = await fetch('/api/profile', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        craft_type: document.getElementById('profileCraftType').value.trim(),
+                        location: document.getElementById('profileLocation').value.trim(),
+                        language_pref: document.getElementById('profileLanguage').value
+                    })
+                });
+                const result = await response.json();
+                profileStatus.textContent = result.success ? 'Saved.' : 'Could not save profile.';
+            } catch (error) {
+                profileStatus.textContent = 'Could not save profile.';
+            }
         });
     </script>
 </body>
