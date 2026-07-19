@@ -8,18 +8,13 @@
 <p align="center">
   <img src="https://img.shields.io/badge/python-3.10%2B-blue?logo=python&logoColor=white" alt="Python 3.10+"/>
   <img src="https://img.shields.io/badge/flask-3.1-black?logo=flask&logoColor=white" alt="Flask 3.1"/>
-  <img src="https://img.shields.io/badge/AI%20model-Gemini%202.5%20Flash-8e44ad?logo=googlegemini&logoColor=white" alt="Gemini 2.5 Flash"/>
-  <img src="https://img.shields.io/badge/storage-CSV%20(SQLite%20planned)-e67e22" alt="Storage: CSV, SQLite planned"/>
   <img src="https://img.shields.io/badge/status-prototype-yellow" alt="Status: prototype"/>
   <img src="https://img.shields.io/badge/license-unspecified-lightgrey" alt="License unspecified"/>
 </p>
 
 <p align="center">
-  <a href="https://hunarhub.onrender.com/">Live demo</a> ·
-  <a href="https://drive.google.com/file/d/1uM2z3IwZ3tKM4DCimJYQt8MKbx1fxjKd/view?usp=drive_link">Demo video</a> ·
-  <a href="#getting-started">Getting started</a> ·
-  <a href="#architecture">Architecture</a> ·
-  <a href="#roadmap">Roadmap</a>
+  <a href="https://hunarhub.onrender.com/">Live demo link</a> ·
+  <a href="https://drive.google.com/file/d/1uM2z3IwZ3tKM4DCimJYQt8MKbx1fxjKd/view?usp=drive_link">Demo video link</a>
 </p>
 
 ---
@@ -39,10 +34,9 @@
 11. [Environment variables](#environment-variables)
 12. [API reference](#api-reference)
 13. [Navigation map](#navigation-map)
-14. [Known limitations](#known-limitations)
-15. [Roadmap](#roadmap)
-16. [Contributing](#contributing)
-17. [License](#license)
+14. [Roadmap](#roadmap)
+15. [Contributing](#contributing)
+16. [License](#license)
 
 ---
 
@@ -310,25 +304,6 @@ description help (optionally with a photo), manually transfers that
 advice into **Add Product**, then checks **History** to see everything
 they've listed, and **Events** for offline/online opportunities to sell
 or showcase work.
-
-## Known limitations
-
-Documented here deliberately, so contributors and reviewers know exactly
-where the prototype currently falls short:
-
-- **Pricing advice is not grounded in real market data.** Gemini estimates
-  a price from its training knowledge, not from live comparable listings.
-- **Events page is static HTML**, not backed by any data source — it does
-  not update and is not personalized to the artisan's craft or location.
-- **No authentication or per-artisan accounts.** Every visitor shares the
-  same `data.csv`; there's no way to scope history to one person.
-- **CSV storage has no locking**, so concurrent writes can corrupt data
-  under load.
-- **No conversation memory.** Every chat message is stateless; the
-  assistant has no awareness of prior questions or the artisan's product
-  history.
-- **`/api/save-product` and `/api/get-products` are unauthenticated** and
-  open to anyone who can reach the server.
 
 ## Roadmap
 
