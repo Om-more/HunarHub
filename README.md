@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://hunarhub.onrender.com/">Live demo link</a> ·
-  <a href="https://drive.google.com/file/d/1uM2z3IwZ3tKM4DCimJYQt8MKbx1fxjKd/view?usp=drive_link">Demo video link</a> ·
+  <a href="https://drive.google.com/file/d/1uM2z3IwZ3tKM4DCimJYQt8MKbx1fxjKd/view?usp=drive_link">Demo video link</a>
 </p>
 
 ---
@@ -34,10 +34,9 @@
 11. [Environment variables](#environment-variables)
 12. [API reference](#api-reference)
 13. [Navigation map](#navigation-map)
-14. [Known limitations](#known-limitations)
-15. [Roadmap](#roadmap)
-16. [Contributing](#contributing)
-17. [License](#license)
+14. [Roadmap](#roadmap)
+15. [Contributing](#contributing)
+16. [License](#license)
 
 ---
 
@@ -305,25 +304,6 @@ description help (optionally with a photo), manually transfers that
 advice into **Add Product**, then checks **History** to see everything
 they've listed, and **Events** for offline/online opportunities to sell
 or showcase work.
-
-## Known limitations
-
-Documented here deliberately, so contributors and reviewers know exactly
-where the prototype currently falls short:
-
-- **Pricing advice is not grounded in real market data.** Gemini estimates
-  a price from its training knowledge, not from live comparable listings.
-- **Events page is static HTML**, not backed by any data source — it does
-  not update and is not personalized to the artisan's craft or location.
-- **No authentication or per-artisan accounts.** Every visitor shares the
-  same `data.csv`; there's no way to scope history to one person.
-- **CSV storage has no locking**, so concurrent writes can corrupt data
-  under load.
-- **No conversation memory.** Every chat message is stateless; the
-  assistant has no awareness of prior questions or the artisan's product
-  history.
-- **`/api/save-product` and `/api/get-products` are unauthenticated** and
-  open to anyone who can reach the server.
 
 ## Roadmap
 
