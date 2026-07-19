@@ -14,7 +14,7 @@
 
 <p align="center">
   <a href="https://hunarhub.onrender.com/">Live demo link</a> ·
-  <a href="https://drive.google.com/file/d/1uM2z3IwZ3tKM4DCimJYQt8MKbx1fxjKd/view?usp=drive_link">Demo video link</a>
+  <a href="https://drive.google.com/file/d/18IvMMVZYv6FmSWJYW3hKIAIQG5-gvoCe/view?usp=sharing">Demo video link</a>
 </p>
 
 ---
