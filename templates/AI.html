@@ -112,6 +112,11 @@
             word-wrap: break-word;
             position: relative;
         }
+
+        .message-text {
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
         
         .message.user .message-bubble {
             background: var(--user-bg);
@@ -543,6 +548,38 @@
             sendBtn.disabled = false;
         }
         
+        function formatChatText(text) {
+            if (text === null || text === undefined) return '';
+
+            let cleaned = String(text).trim();
+            if (!cleaned) return '';
+
+            try {
+                const parsed = JSON.parse(cleaned);
+                if (parsed && typeof parsed === 'object') {
+                    if (typeof parsed.reply === 'string') cleaned = parsed.reply;
+                    else if (typeof parsed.response === 'string') cleaned = parsed.response;
+                    else if (typeof parsed.message === 'string') cleaned = parsed.message;
+                    else cleaned = JSON.stringify(parsed, null, 2);
+                }
+            } catch (error) {
+                // Ignore parse errors and use the original text.
+            }
+
+            cleaned = cleaned
+                .replace(/^```(?:json|txt|text)?\s*/gim, '')
+                .replace(/\s*```$/gim, '')
+                .replace(/^#+\s*/gm, '')
+                .replace(/\*\*(.*?)\*\*/g, '$1')
+                .replace(/__(.*?)__/g, '$1')
+                .replace(/[*_`]+/g, '')
+                .replace(/^\s*[-*]\s+/gm, '• ')
+                .replace(/^\s*\d+\.\s+/gm, '• ')
+                .replace(/\\n/g, '\n');
+
+            return cleaned.trim();
+        }
+
         // Add message to chat
         function addMessage(text, sender, imageSrc = null, options = {}) {
             const messagesContainer = document.getElementById('messagesContainer');
@@ -566,32 +603,8 @@
             
             if (text) {
                 const textDiv = document.createElement('div');
-                
-                if (sender === 'bot') {
-                    let html = text;
-                    
-                    const imageUrlMarkdownRegex = /\[.*?\]\((https?:\/\/[^\s]+?\.(jpg|jpeg|png|gif))\)/i;
-                    const markdownMatch = text.match(imageUrlMarkdownRegex);
-                    
-                    if (markdownMatch) {
-                        const url = markdownMatch[1];
-                        html = text.replace(imageUrlMarkdownRegex, '');
-                        html += `<br><img src="${url}" alt="AI Generated Image" style="max-width:220px; border-radius:8px; margin-top:10px;">`;
-                    } else {
-                        // Check for raw URLs
-                        const rawUrlRegex = /(https?:\/\/[^\s]+?\.(jpg|jpeg|png|gif))/i;
-                        const rawMatch = text.match(rawUrlRegex);
-                        if (rawMatch) {
-                            html = text.replace(rawUrlRegex, '');
-                            html += `<br><img src="${rawMatch[0]}" alt="AI Generated Image" style="max-width:220px; border-radius:8px; margin-top:10px;">`;
-                        }
-                    }
-                    
-                    textDiv.innerHTML = html.replace(/\n/g, '<br>');
-                } else {
-                    textDiv.innerHTML = text.replace(/\n/g, '<br>');
-                }
-                
+                textDiv.className = 'message-text';
+                textDiv.textContent = formatChatText(text);
                 bubble.appendChild(textDiv);
             }
 

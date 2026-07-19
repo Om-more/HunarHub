@@ -1,6 +1,7 @@
 import base64
 import json
 import os
+import re
 import secrets
 import sqlite3
 from datetime import datetime
@@ -196,18 +197,60 @@ def build_artisan_context(artisan_id):
     )
 
 
+def normalize_chat_text(text):
+    """Convert raw LLM output into clean, human-readable chat text."""
+    if text is None:
+        return ""
+
+    if not isinstance(text, str):
+        text = str(text)
+
+    text = text.strip()
+    if not text:
+        return ""
+
+    try:
+        parsed = json.loads(text)
+        if isinstance(parsed, dict):
+            if isinstance(parsed.get("reply"), str):
+                text = parsed["reply"]
+            elif isinstance(parsed.get("response"), str):
+                text = parsed["response"]
+            elif isinstance(parsed.get("message"), str):
+                text = parsed["message"]
+            else:
+                text = json.dumps(parsed, ensure_ascii=False, indent=2)
+        elif isinstance(parsed, list):
+            text = json.dumps(parsed, ensure_ascii=False, indent=2)
+    except (TypeError, json.JSONDecodeError):
+        pass
+
+    text = re.sub(r"```(?:json|txt|text)?\s*", "", text, flags=re.IGNORECASE)
+    text = re.sub(r"\s*```$", "", text, flags=re.MULTILINE)
+    text = re.sub(r"^#+\s*", "", text, flags=re.MULTILINE)
+    text = re.sub(r"\*\*(.*?)\*\*", r"\1", text)
+    text = re.sub(r"__(.*?)__", r"\1", text)
+    text = re.sub(r"[*_`]+", "", text)
+    text = re.sub(r"(?m)^\s*[-*]\s+", "• ", text)
+    text = re.sub(r"(?m)^\s*\d+\.\s+", "• ", text)
+    text = text.replace("\\n", "\n")
+    text = re.sub(r"\r\n?", "\n", text)
+    text = re.sub(r"\n{3,}", "\n\n", text)
+    return text.strip()
+
+
 def parse_structured_product_response(raw_text):
     """Gemini can occasionally ignore strict JSON; fall back without breaking chat."""
     try:
         parsed = json.loads(raw_text)
         return {
-            "reply": parsed.get("reply") or raw_text,
+            "reply": normalize_chat_text(parsed.get("reply") or raw_text),
             "product_suggestion": parsed.get("product_suggestion"),
             "structured_json": raw_text,
         }
     except (TypeError, json.JSONDecodeError):
         return {
-            "reply": raw_text,
+            "reply": normalize_chat_text(raw_text),
             "product_suggestion": None,
             "structured_json": raw_text,
         }
@@ -261,13 +304,13 @@ def query_with_image(user_question, artisan_id=None, image_path=None, image_byte
 
         response = model.generate_content(prompt)
         return {
-            "reply": response.text,
+            "reply": normalize_chat_text(response.text),
             "product_suggestion": None,
             "structured_json": None,
         }
     except Exception as e:
         return {
-            "reply": f"Error processing request: {str(e)}",
+            "reply": normalize_chat_text(f"Error processing request: {str(e)}"),
             "product_suggestion": None,
             "structured_json": None,
         }
